@@ -1,5 +1,5 @@
 ---
-- hosts: ansible-master
+- hosts: jenkins-master
   become: yes
   tasks:
     - name: Update apt update
