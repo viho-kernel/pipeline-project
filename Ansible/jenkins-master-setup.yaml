@@ -1,53 +1,39 @@
 ---
 - hosts: jenkins-master
-  become: yes
-  tasks:
-    - name: Update apt update
-      apt:
-        update_cache: yes
-    - name: Install Java
-      apt:
-        name: openjdk-21-jre
-        state: present
+  become: true 
+  tasks: 
+  - name: add jenkins key 
+    apt_key: 
+      url:  https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      state: present 
 
-    - name: check java version
-      ansible.builtin.command:
-        cmd: java -version
+  - name: add jenkins repo 
+    apt_repository: 
+      repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+      state: present 
 
-    - name: Install UFW
-      apt:
-        name: ufw
-        state: present
+  - name: install java 
+    apt: 
+      name: openjdk-21-jre
+      state: present
 
-    - name: Download Jenkins key
-      ansible.builtin.get_url:
-        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
-        dest: /tmp/jenkins.io.key
+  - name: install jenkins 
+    apt: 
+      name: jenkins 
+      state: present 
 
-    - name: Add Jenkins key
-      apt_key:
-        file: /tmp/jenkins.io.key
-        state: present
+  - name: start jenkins service 
+    service: 
+      name: jenkins 
+      state: started 
 
-    - name: Add Jenkins repository key
-      apt_repository:
-        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
-        state: present
-
-    - name: Install Jenkins
-      apt:
-        name: jenkins
-        state: present
-
-    - name: Start and enable Jenkins service
-      systemd:
-        name: jenkins
-        state: started
-        enabled: yes
-
-    - name: Ensure firewall allows Jenkins port
-      ufw:
-        rule: allow
-        port: 8080
-        proto: tcp
+  - name: enable jenkins to start at boot time 
+    service: 
+      name: jenkins 
+      enabled: yes 
   
+  - name: enable firewall for jenkins port
+    ufw:
+      rule: allow
+      port: 8080
+      proto: tcp
