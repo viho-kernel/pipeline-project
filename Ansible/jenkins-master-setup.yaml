@@ -1,0 +1,53 @@
+---
+- hosts: ansible-master
+  become: yes
+  tasks:
+    - name: Update apt update
+      apt:
+        update_cache: yes
+    - name: Install Java
+      apt:
+        name: openjdk-21-jre
+        state: present
+
+    - name: check java version
+      ansible.builtin.command:
+        cmd: java -version
+
+    - name: Install UFW
+      apt:
+        name: ufw
+        state: present
+
+    - name: Download Jenkins key
+      ansible.builtin.get_url:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        dest: /tmp/jenkins.io.key
+
+    - name: Add Jenkins key
+      apt_key:
+        file: /tmp/jenkins.io.key
+        state: present
+
+    - name: Add Jenkins repository key
+      apt_repository:
+        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+        state: present
+
+    - name: Install Jenkins
+      apt:
+        name: jenkins
+        state: present
+
+    - name: Start and enable Jenkins service
+      systemd:
+        name: jenkins
+        state: started
+        enabled: yes
+
+    - name: Ensure firewall allows Jenkins port
+      ufw:
+        rule: allow
+        port: 8080
+        proto: tcp
+  
