@@ -1,14 +1,13 @@
 resource "aws_instance" "project-server" {
-    ami = "ami-0341d95f75f311023"
+    ami = "ami-0360c520857e3138f"
     instance_type = "t2.micro"
     key_name = "project-pair"
     //security_groups = [aws_security_group.project-sg.name]
     subnet_id = aws_subnet.project-subnet-01.id
     vpc_security_group_ids = [aws_security_group.project-sg.id]
-   # Replace with your actual key pair name
+    for_each = toset(["Jenkins-master", "build-worker", "Ansible"])
     tags = {
-        Name = "ProjectServer"
-        Environment = "Development"
+        Name = "${each.key}"
     }
   
 }
@@ -77,7 +76,7 @@ resource "aws_internet_gateway" "project-igw" {
 
 resource "aws_route_table" "project-route-table" {
   vpc_id = aws_vpc.project-vpc.id
-  route = {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.project-igw.id
   }
