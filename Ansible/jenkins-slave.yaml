@@ -1,5 +1,5 @@
 ---
-- hosts: jenkins-slave
+- hosts: Jenkins-Slave
   become: true 
   tasks: 
   - name: update ubuntu cache
